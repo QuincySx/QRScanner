@@ -8,6 +8,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -82,6 +83,14 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
         return mResultCallback;
     }
 
+    public VerifyScan getVerifyScan() {
+        return mVerifyScan;
+    }
+
+    public void setVerifyScan(VerifyScan verifyScan) {
+        mVerifyScan = verifyScan;
+    }
+
     public void setResultCallback(ResultCallback resultCallback) {
         mResultCallback = resultCallback;
     }
@@ -125,6 +134,13 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
         }
 
         inactivityTimer.onResume();
+    }
+
+    public void ss() {
+        Message message = new Message();
+        message.what = R.id.decode_succeeded;
+        message.obj = null;
+        getHandler().sendMessage(message);
     }
 
     @Override

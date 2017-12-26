@@ -66,7 +66,6 @@ public class ScanFragmentHandler extends Handler {
             // start another.
             state = State.PREVIEW;
             cameraManager.requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
-
         } else if (message.what == R.id.return_scan_result) {
             mScanFragment.getActivity().setResult(Activity.RESULT_OK, (Intent) message.obj);
             mScanFragment.getActivity().finish();

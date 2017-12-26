@@ -15,37 +15,14 @@
  */
 package com.cardinfolink.qrscanner.activity;
 
-import android.Manifest;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Rect;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
 
 import com.cardinfolink.qrscanner.R;
 import com.cardinfolink.qrscanner.base.BaseActivity;
-import com.cardinfolink.qrscanner.utils.ToastUtils;
-import com.cardinfolink.qrscanner.view.ScanBoxView;
-import com.cardinfolink.qrscanner.zxing.camera.CameraManager;
-import com.cardinfolink.qrscanner.zxing.decode.DecodeThread;
-import com.cardinfolink.qrscanner.zxing.utils.BeepManager;
-import com.cardinfolink.qrscanner.zxing.utils.ScanFragmentHandler;
-import com.cardinfolink.qrscanner.zxing.utils.InactivityTimer;
 import com.google.zxing.Result;
-
-import java.io.IOException;
 
 
 /**
@@ -68,14 +45,14 @@ public final class CaptureActivity extends BaseActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_capture);
 
-        ScanFragment scanFragment = ScanFragment.newInstance(new ResultCallback() {
+        mScanFragment = ScanFragment.newInstance(new ResultCallback() {
             @Override
             public void onSuccess(Result result) {
                 Log.e("====", "++++++" + result.getText());
             }
         });
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.layout_scan, scanFragment)
+                .add(R.id.layout_scan, mScanFragment)
                 .commitNowAllowingStateLoss();
     }
 
