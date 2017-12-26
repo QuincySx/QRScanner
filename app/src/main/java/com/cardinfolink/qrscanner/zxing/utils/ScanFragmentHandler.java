@@ -23,6 +23,7 @@ import android.os.Message;
 
 import com.cardinfolink.qrscanner.R;
 import com.cardinfolink.qrscanner.activity.CaptureActivity;
+import com.cardinfolink.qrscanner.activity.ScanFragment;
 import com.cardinfolink.qrscanner.zxing.camera.CameraManager;
 import com.cardinfolink.qrscanner.zxing.decode.DecodeThread;
 import com.google.zxing.Result;
@@ -34,16 +35,16 @@ import com.google.zxing.Result;
  *
  * @author dswitkin@google.com (Daniel Switkin)
  */
-public class CaptureActivityHandler extends Handler {
+public class ScanFragmentHandler extends Handler {
 
-    private final CaptureActivity activity;
+    private final ScanFragment mScanFragment;
     private final DecodeThread decodeThread;
     private final CameraManager cameraManager;
     private State state;
 
-    public CaptureActivityHandler(CaptureActivity activity, CameraManager cameraManager, int decodeMode) {
-        this.activity = activity;
-        decodeThread = new DecodeThread(activity, decodeMode);
+    public ScanFragmentHandler(ScanFragment fragment, CameraManager cameraManager, int decodeMode) {
+        this.mScanFragment = fragment;
+        decodeThread = new DecodeThread(fragment, decodeMode);
         decodeThread.start();
         state = State.SUCCESS;
 
@@ -57,11 +58,9 @@ public class CaptureActivityHandler extends Handler {
     public void handleMessage(Message message) {
         if (message.what == R.id.restart_preview) {
             restartPreviewAndDecode();
-
         } else if (message.what == R.id.decode_succeeded) {
             state = State.SUCCESS;
-            activity.handleDecode((Result) message.obj);
-
+            mScanFragment.handleDecode((Result) message.obj);
         } else if (message.what == R.id.decode_failed) {// We're decoding as fast as possible, so when one
             // decode fails,
             // start another.
@@ -69,8 +68,8 @@ public class CaptureActivityHandler extends Handler {
             cameraManager.requestPreviewFrame(decodeThread.getHandler(), R.id.decode);
 
         } else if (message.what == R.id.return_scan_result) {
-            activity.setResult(Activity.RESULT_OK, (Intent) message.obj);
-            activity.finish();
+            mScanFragment.getActivity().setResult(Activity.RESULT_OK, (Intent) message.obj);
+            mScanFragment.getActivity().finish();
         }
     }
 

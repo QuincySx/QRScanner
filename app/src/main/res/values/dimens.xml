@@ -15,7 +15,6 @@
     <dimen name="text_36">36sp</dimen>
     <dimen name="text_48">48sp</dimen>
 
-    <dimen name="capture_rectWidth">278dp</dimen>
-
+    <dimen name="capture_rectWidth">190dp</dimen>
 
 </resources>

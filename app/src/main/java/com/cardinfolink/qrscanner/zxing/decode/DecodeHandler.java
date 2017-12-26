@@ -26,6 +26,7 @@ import android.os.Message;
 
 import com.cardinfolink.qrscanner.R;
 import com.cardinfolink.qrscanner.activity.CaptureActivity;
+import com.cardinfolink.qrscanner.activity.ScanFragment;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.MultiFormatReader;
@@ -39,14 +40,14 @@ import java.util.Map;
 
 public class DecodeHandler extends Handler {
 
-    private final CaptureActivity activity;
+    private final ScanFragment activity;
     private final MultiFormatReader multiFormatReader;
     private boolean running = true;
 
-    public DecodeHandler(CaptureActivity activity, Map<DecodeHintType, Object> hints) {
+    public DecodeHandler(ScanFragment fragment, Map<DecodeHintType, Object> hints) {
         multiFormatReader = new MultiFormatReader();
         multiFormatReader.setHints(hints);
-        this.activity = activity;
+        this.activity = fragment;
     }
 
     private static void bundleThumbnail(PlanarYUVLuminanceSource source, Bundle bundle) {
@@ -66,11 +67,9 @@ public class DecodeHandler extends Handler {
         }
         if (message.what == R.id.decode) {
             decode((byte[]) message.obj, message.arg1, message.arg2);
-
         } else if (message.what == R.id.quit) {
             running = false;
             Looper.myLooper().quit();
-
         }
     }
 

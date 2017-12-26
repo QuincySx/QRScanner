@@ -85,7 +85,6 @@ public final class CameraConfigurationManager {
         if (safeMode) {
             Log.w(TAG, "In camera config safe mode -- most settings will not be honored");
         }
-
         parameters.setPreviewSize(mCameraResolution.width, mCameraResolution.height);
         parameters.setPictureSize(mPictureResolution.width, mPictureResolution.height);
 
