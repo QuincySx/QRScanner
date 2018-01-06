@@ -34,6 +34,7 @@ import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
 import com.google.zxing.common.GlobalHistogramBinarizer;
+import com.google.zxing.common.HybridBinarizer;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Map;
@@ -103,7 +104,7 @@ public class DecodeHandler extends Handler {
         if (source != null) {
             //如果觉得HybridBinarizer速度慢的话，可以替换算法，改成GlobalHistogramBinarizer
             //  BinaryBitmap bitmap = new BinaryBitmap(new GlobalHistogramBinarizer(source));
-            BinaryBitmap bitmap = new BinaryBitmap(new GlobalHistogramBinarizer(source));
+            BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
             try {
                 rawResult = multiFormatReader.decodeWithState(bitmap);
             } catch (ReaderException re) {

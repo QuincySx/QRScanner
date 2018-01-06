@@ -17,12 +17,17 @@ package com.cardinfolink.qrscanner.activity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.cardinfolink.qrscanner.R;
 import com.cardinfolink.qrscanner.base.BaseActivity;
+import com.cardinfolink.qrscanner.utils.BitmapDecodeUtils;
 import com.google.zxing.Result;
+import com.jph.takephoto.app.XTakePhoto;
+import com.jph.takephoto.model.TResult;
 
 
 /**
@@ -34,8 +39,9 @@ import com.google.zxing.Result;
  * @author dswitkin@google.com (Daniel Switkin)
  * @author Sean Owen
  */
-public final class CaptureActivity extends BaseActivity {
+public final class CaptureActivity extends BaseActivity implements XTakePhoto.TakeResultListener {
     private ScanFragment mScanFragment;
+    private XTakePhoto mXTakePhoto;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -44,6 +50,8 @@ public final class CaptureActivity extends BaseActivity {
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_capture);
+
+        mXTakePhoto = XTakePhoto.with(this);
 
         mScanFragment = ScanFragment.newInstance(new ResultCallback() {
             @Override
@@ -56,4 +64,27 @@ public final class CaptureActivity extends BaseActivity {
                 .commitNowAllowingStateLoss();
     }
 
+    public void onClick(View view) {
+        mXTakePhoto.onPickFromGallery();
+    }
+
+    @Override
+    public void takeSuccess(TResult tResult) {
+        Result result = BitmapDecodeUtils.scanningImage(tResult.getImage().getOriginalPath());
+        if (result != null) {
+            Toast.makeText(this, result.getText(), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "图片识别失败", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void takeFail(TResult tResult, String s) {
+
+    }
+
+    @Override
+    public void takeCancel() {
+
+    }
 }
