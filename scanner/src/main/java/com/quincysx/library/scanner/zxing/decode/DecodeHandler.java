@@ -30,6 +30,7 @@ import com.google.zxing.MultiFormatReader;
 import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
+import com.google.zxing.common.GlobalHistogramBinarizer;
 import com.google.zxing.common.HybridBinarizer;
 import com.quincysx.library.scanner.ScanFragment;
 import com.quincysx.qrscan.library.R;
@@ -101,8 +102,8 @@ public class DecodeHandler extends Handler {
         PlanarYUVLuminanceSource source = buildLuminanceSource(rotatedData, size.width, size.height);
         if (source != null) {
             //如果觉得HybridBinarizer速度慢的话，可以替换算法，改成GlobalHistogramBinarizer
-            //  BinaryBitmap bitmap = new BinaryBitmap(new GlobalHistogramBinarizer(source));
-            BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+            BinaryBitmap bitmap = new BinaryBitmap(new GlobalHistogramBinarizer(source));
+//            BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
             try {
                 rawResult = multiFormatReader.decodeWithState(bitmap);
             } catch (ReaderException re) {

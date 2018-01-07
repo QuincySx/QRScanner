@@ -12,12 +12,12 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import com.quincysx.library.scanner.utils.BGAQRCodeUtils;
 import com.quincysx.library.scanner.utils.SystemUtils;
 import com.quincysx.qrscan.library.R;
-
 
 public class ScanBoxView extends View implements IScanBoxView {
     private int mMoveStepDistance;
@@ -52,7 +52,6 @@ public class ScanBoxView extends View implements IScanBoxView {
 
     private Bitmap mOriginQRCodeScanLineBitmap;
     private Bitmap mOriginQRCodeGridScanLineBitmap;
-
 
     private float mHalfCornerSize;
 
@@ -144,7 +143,9 @@ public class ScanBoxView extends View implements IScanBoxView {
             mOriginQRCodeScanLineBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.line);
             mOriginQRCodeScanLineBitmap = BGAQRCodeUtils.makeTintBitmap(mOriginQRCodeScanLineBitmap, mScanLineColor);
         }
+        Log.e("===1===", mTopOffset + "ssdsdsdsd");
         mTopOffset += mToolbarHeight;
+        Log.e("===2===", mTopOffset + "ssdsdsdsd");
         mHalfCornerSize = 1.0f * mCornerSize / 2;
 
 
@@ -289,6 +290,7 @@ public class ScanBoxView extends View implements IScanBoxView {
 
     private void calFramingRect() {
         int leftOffset = (getWidth() - mRectWidth) / 2;
+        Log.e("===3===", mTopOffset + "ssdsdsdsd");
         mFramingRect = new Rect(leftOffset, mTopOffset, leftOffset + mRectWidth, mTopOffset + mRectHeight);
 
         mGridScanLineBottom = mScanLineTop = mFramingRect.top + mHalfCornerSize + 0.5f;

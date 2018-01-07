@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.quincysx.library.scanner.zxing.utils;
+package com.quincysx.library.scanner;
 
 import android.app.Activity;
 import android.content.Intent;
