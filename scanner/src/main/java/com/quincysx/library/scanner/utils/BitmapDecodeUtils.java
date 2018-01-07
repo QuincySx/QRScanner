@@ -1,4 +1,4 @@
-package com.quincysx.library.scanner;
+package com.quincysx.library.scanner.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

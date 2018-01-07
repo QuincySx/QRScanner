@@ -13,24 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cardinfolink.qrscanner.activity;
+
+package com.quincysx.scanner.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.cardinfolink.qrscanner.R;
 import com.google.zxing.Result;
-import com.jph.takephoto.app.XTakePhoto;
-import com.jph.takephoto.model.TResult;
-import com.quincysx.library.scanner.BitmapDecodeUtils;
 import com.quincysx.library.scanner.ResultCallback;
+import com.quincysx.library.scanner.ScanBoxView;
 import com.quincysx.library.scanner.ScanFragment;
-
 
 /**
  * This activity opens the camera and does the actual scanning on a background
@@ -41,9 +36,7 @@ import com.quincysx.library.scanner.ScanFragment;
  * @author dswitkin@google.com (Daniel Switkin)
  * @author Sean Owen
  */
-public final class CaptureActivity extends AppCompatActivity implements XTakePhoto.TakeResultListener {
-    private ScanFragment mScanFragment;
-    private XTakePhoto mXTakePhoto;
+public final class CaptureActivity extends AppCompatActivity {
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -53,52 +46,17 @@ public final class CaptureActivity extends AppCompatActivity implements XTakePho
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_capture);
 
-        mXTakePhoto = XTakePhoto.with(this);
+        ScanBoxView scanBoxView = findViewById(R.id.capture_crop_view_v);
 
-        mScanFragment = ScanFragment.newInstance(new ResultCallback() {
+        ScanFragment scanFragment = ScanFragment.newInstance(scanBoxView, new ResultCallback() {
             @Override
             public void onSuccess(Result result) {
-                Log.e("====", "++++++" + result.getText());
                 Toast.makeText(CaptureActivity.this, result.getText(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.layout_scan, mScanFragment)
+                .add(R.id.layout_scan, scanFragment)
                 .commitAllowingStateLoss();
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        getSupportFragmentManager().beginTransaction().remove(mScanFragment).commitAllowingStateLoss();
-    }
-
-    public void onClick(View view) {
-        mXTakePhoto.onPickFromGallery();
-    }
-
-    @Override
-    public void takeSuccess(TResult tResult) {
-        Result result = BitmapDecodeUtils.scanningImage(tResult.getImage().getOriginalPath());
-        if (result != null) {
-            Toast.makeText(this, result.getText(), Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "图片识别失败", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void takeFail(TResult tResult, String s) {
-
-    }
-
-    @Override
-    public void takeCancel() {
-
-    }
 }

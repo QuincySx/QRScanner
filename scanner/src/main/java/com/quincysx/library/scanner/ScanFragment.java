@@ -8,7 +8,6 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -19,6 +18,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.zxing.Result;
 import com.quincysx.library.scanner.zxing.camera.CameraManager;
@@ -35,14 +35,15 @@ import java.io.IOException;
  * @date 2017/12/26 下午2:21
  */
 public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
-    public static ScanFragment newInstance(ResultCallback resultCallback) {
-        return newInstance(resultCallback, DefVerifyScan);
+    public static ScanFragment newInstance(IScanBoxView scanBoxView, ResultCallback resultCallback) {
+        return newInstance(DefVerifyScan, scanBoxView, resultCallback);
     }
 
-    public static ScanFragment newInstance(ResultCallback resultCallback, VerifyScan verifyScan) {
+    public static ScanFragment newInstance(VerifyScan verifyScan, IScanBoxView scanBoxView, ResultCallback resultCallback) {
         ScanFragment scanFragment = new ScanFragment();
         scanFragment.setResultCallback(resultCallback);
         scanFragment.mVerifyScan = verifyScan;
+        scanFragment.mIScanBoxView = scanBoxView;
         return scanFragment;
     }
 
@@ -64,7 +65,7 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
     private BeepManager beepManager;
 
     private SurfaceView scanPreview = null;
-    private ScanBoxView scanBoxView = null;
+    private IScanBoxView mIScanBoxView = null;
     private boolean isHasSurface = false;
     private Rect mCropRect = null;
 
@@ -95,9 +96,8 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View inflate = inflater.inflate(R.layout.fragment_scan, container, false);
-        scanPreview = (SurfaceView) inflate.findViewById(R.id.capture_preview);
-        scanBoxView = (ScanBoxView) inflate.findViewById(R.id.capture_crop_view_v);
+        View inflate = inflater.inflate(R.layout.fragment_scan_box, container, false);
+        scanPreview = inflate.findViewById(R.id.capture_preview);
 
         inactivityTimer = new InactivityTimer(getActivity());
         beepManager = new BeepManager(getActivity());
@@ -131,13 +131,6 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
         }
 
         inactivityTimer.onResume();
-    }
-
-    public void ss() {
-        Message message = new Message();
-        message.what = R.id.decode_succeeded;
-        message.obj = null;
-        getHandler().sendMessage(message);
     }
 
     @Override
@@ -272,7 +265,7 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
     private void initCrop() {
         int cameraWidth = cameraManager.getCameraResolution().height;
         int cameraHeight = cameraManager.getCameraResolution().width;
-        mCropRect = scanBoxView.getScanBoxAreaRect(cameraWidth, cameraHeight);
+        mCropRect = mIScanBoxView.getScanBoxAreaRect(cameraWidth, cameraHeight);
     }
 
     @Override
@@ -281,8 +274,8 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 initCamera(scanPreview.getHolder());
             } else {
+                Toast.makeText(getContext(), "没有相机权限", Toast.LENGTH_SHORT).show();
                 // Permission Denied
-                ToastUtils.showToast(getContext(), "Permission Denied");
             }
             return;
         }

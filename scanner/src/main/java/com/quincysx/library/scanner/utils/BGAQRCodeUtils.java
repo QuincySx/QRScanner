@@ -1,4 +1,4 @@
-package com.quincysx.library.scanner;
+package com.quincysx.library.scanner.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,7 +11,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.view.Display;
 import android.view.WindowManager;
 
-public class BGAQRCodeUtil {
+public class BGAQRCodeUtils {
 
     public static Point getScreenResolution(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);

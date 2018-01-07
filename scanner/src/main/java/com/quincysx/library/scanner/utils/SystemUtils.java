@@ -1,4 +1,4 @@
-package com.quincysx.library.scanner;
+package com.quincysx.library.scanner.utils;
 
 import android.app.Activity;
 import android.content.Context;

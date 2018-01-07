@@ -14,10 +14,12 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.quincysx.library.scanner.utils.BGAQRCodeUtils;
+import com.quincysx.library.scanner.utils.SystemUtils;
 import com.quincysx.qrscan.library.R;
 
 
-public class ScanBoxView extends View {
+public class ScanBoxView extends View implements IScanBoxView {
     private int mMoveStepDistance;
     private int mAnimDelayTime;
 
@@ -132,7 +134,7 @@ public class ScanBoxView extends View {
         }
         if (mOriginQRCodeGridScanLineBitmap == null) {
             mOriginQRCodeGridScanLineBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.scan_grid);
-            mOriginQRCodeGridScanLineBitmap = BGAQRCodeUtil.makeTintBitmap(mOriginQRCodeGridScanLineBitmap, mScanLineColor);
+            mOriginQRCodeGridScanLineBitmap = BGAQRCodeUtils.makeTintBitmap(mOriginQRCodeGridScanLineBitmap, mScanLineColor);
         }
 
         if (mCustomScanLineDrawable != null) {
@@ -140,7 +142,7 @@ public class ScanBoxView extends View {
         }
         if (mOriginQRCodeScanLineBitmap == null) {
             mOriginQRCodeScanLineBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.line);
-            mOriginQRCodeScanLineBitmap = BGAQRCodeUtil.makeTintBitmap(mOriginQRCodeScanLineBitmap, mScanLineColor);
+            mOriginQRCodeScanLineBitmap = BGAQRCodeUtils.makeTintBitmap(mOriginQRCodeScanLineBitmap, mScanLineColor);
         }
         mTopOffset += mToolbarHeight;
         mHalfCornerSize = 1.0f * mCornerSize / 2;
@@ -316,7 +318,7 @@ public class ScanBoxView extends View {
 
 
         if (mIsCenterVertical) {
-            int screenHeight = BGAQRCodeUtil.getScreenResolution(getContext()).y;
+            int screenHeight = BGAQRCodeUtils.getScreenResolution(getContext()).y;
             if (mToolbarHeight == 0) {
                 mTopOffset = (screenHeight - mRectHeight) / 2;
             } else {
