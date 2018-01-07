@@ -16,6 +16,7 @@
 package com.cardinfolink.qrscanner.activity;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -23,11 +24,12 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.cardinfolink.qrscanner.R;
-import com.cardinfolink.qrscanner.base.BaseActivity;
-import com.cardinfolink.qrscanner.utils.BitmapDecodeUtils;
 import com.google.zxing.Result;
 import com.jph.takephoto.app.XTakePhoto;
 import com.jph.takephoto.model.TResult;
+import com.quincysx.library.scanner.BitmapDecodeUtils;
+import com.quincysx.library.scanner.ResultCallback;
+import com.quincysx.library.scanner.ScanFragment;
 
 
 /**
@@ -39,7 +41,7 @@ import com.jph.takephoto.model.TResult;
  * @author dswitkin@google.com (Daniel Switkin)
  * @author Sean Owen
  */
-public final class CaptureActivity extends BaseActivity implements XTakePhoto.TakeResultListener {
+public final class CaptureActivity extends AppCompatActivity implements XTakePhoto.TakeResultListener {
     private ScanFragment mScanFragment;
     private XTakePhoto mXTakePhoto;
 
@@ -57,11 +59,23 @@ public final class CaptureActivity extends BaseActivity implements XTakePhoto.Ta
             @Override
             public void onSuccess(Result result) {
                 Log.e("====", "++++++" + result.getText());
+                Toast.makeText(CaptureActivity.this, result.getText(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.layout_scan, mScanFragment)
-                .commitNowAllowingStateLoss();
+                .commitAllowingStateLoss();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        getSupportFragmentManager().beginTransaction().remove(mScanFragment).commitAllowingStateLoss();
     }
 
     public void onClick(View view) {
