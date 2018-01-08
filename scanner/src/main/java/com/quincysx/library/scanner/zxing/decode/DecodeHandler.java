@@ -31,9 +31,8 @@ import com.google.zxing.PlanarYUVLuminanceSource;
 import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
 import com.google.zxing.common.GlobalHistogramBinarizer;
-import com.google.zxing.common.HybridBinarizer;
+import com.quincysx.library.scanner.R;
 import com.quincysx.library.scanner.ScanFragment;
-import com.quincysx.qrscan.library.R;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Map;

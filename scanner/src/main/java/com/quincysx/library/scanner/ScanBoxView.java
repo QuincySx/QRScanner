@@ -17,7 +17,6 @@ import android.view.View;
 
 import com.quincysx.library.scanner.utils.BGAQRCodeUtils;
 import com.quincysx.library.scanner.utils.SystemUtils;
-import com.quincysx.qrscan.library.R;
 
 public class ScanBoxView extends View implements IScanBoxView {
     private int mMoveStepDistance;

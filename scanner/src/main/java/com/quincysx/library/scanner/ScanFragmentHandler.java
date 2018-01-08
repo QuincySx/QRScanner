@@ -25,7 +25,6 @@ import com.google.zxing.Result;
 import com.quincysx.library.scanner.ScanFragment;
 import com.quincysx.library.scanner.zxing.camera.CameraManager;
 import com.quincysx.library.scanner.zxing.decode.DecodeThread;
-import com.quincysx.qrscan.library.R;
 
 
 /**

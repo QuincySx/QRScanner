@@ -25,7 +25,6 @@ import com.quincysx.library.scanner.zxing.camera.CameraManager;
 import com.quincysx.library.scanner.zxing.decode.DecodeThread;
 import com.quincysx.library.scanner.zxing.utils.BeepManager;
 import com.quincysx.library.scanner.zxing.utils.InactivityTimer;
-import com.quincysx.qrscan.library.R;
 
 import java.io.IOException;
 
