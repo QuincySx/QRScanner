@@ -186,6 +186,8 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
 
         if (mVerifyScan.isVerify(rawResult.getText())) {
             mResultCallback.onSuccess(rawResult);
+        } else {
+            Toast.makeText(getActivity(), R.string.hint_qr_scanner_verify_error, Toast.LENGTH_SHORT).show();
         }
         restartPreviewAfterDelay(1000);
     }
