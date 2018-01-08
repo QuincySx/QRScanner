@@ -28,54 +28,62 @@ public class BitmapDecodeUtils {
     public static Result scanningImage(String path) {
         if (TextUtils.isEmpty(path)) {
             return null;
-
         }
-
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true; // 先获取原大小
+//        options.inJustDecodeBounds = true; // 先获取原大小
         Bitmap scanBitmap = BitmapFactory.decodeFile(path, options);
-        options.inJustDecodeBounds = false;
-        int sampleSize = (int) (options.outHeight / (float) 200);
-        if (sampleSize <= 0)
-            sampleSize = 1;
+        return scanningImage(scanBitmap);
+    }
 
-        options.inSampleSize = sampleSize;
-        scanBitmap = BitmapFactory.decodeFile(path, options);
-        byte[] data = getYUV420sp(scanBitmap.getWidth(), scanBitmap.getHeight(), scanBitmap);
-
-        Collection<BarcodeFormat> decodeFormats = new ArrayList<BarcodeFormat>();
-        decodeFormats.add(BarcodeFormat.CODE_128);
-        decodeFormats.add(BarcodeFormat.QR_CODE);
-
-        Hashtable<DecodeHintType, Object> hints = new Hashtable();
-        hints.put(DecodeHintType.CHARACTER_SET, "UTF-8"); // 设置二维码内容的编码
-        hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
-        hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);
-        PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(data,
-                scanBitmap.getWidth(),
-                scanBitmap.getHeight(),
-                0, 0,
-                scanBitmap.getWidth(),
-                scanBitmap.getHeight(),
-                false);
-
-        BinaryBitmap bitmap1 = new BinaryBitmap(new HybridBinarizer(source));
-        QRCodeReader reader2 = new QRCodeReader();
-        Result result = null;
+    public static Result scanningImage(Bitmap scanBitmap) {
         try {
-            result = reader2.decode(bitmap1, hints);
-            Log.e("hxy", result.getText());
-        } catch (NotFoundException e) {
-            Log.e("hxy", "NotFoundException");
-        } catch (ChecksumException e) {
-            Log.e("hxy", "ChecksumException");
-        } catch (FormatException e) {
-            Log.e("hxy", "FormatException");
+//        BitmapFactory.Options options = new BitmapFactory.Options();
+//        options.inJustDecodeBounds = true; // 先获取原大小
+//        Bitmap scanBitmap = BitmapFactory.decodeFile(path, options);
+//        options.inJustDecodeBounds = false;
+//        int sampleSize = (int) (options.outHeight / (float) 200);
+//        if (sampleSize <= 0)
+//            sampleSize = 1;
+//
+//        options.inSampleSize = sampleSize;
+//        scanBitmap = BitmapFactory.decodeFile(path, options);
+            byte[] data = getYUV420sp(scanBitmap.getWidth(), scanBitmap.getHeight(), scanBitmap);
+
+            Collection<BarcodeFormat> decodeFormats = new ArrayList<BarcodeFormat>();
+            decodeFormats.add(BarcodeFormat.CODE_128);
+            decodeFormats.add(BarcodeFormat.QR_CODE);
+
+            Hashtable<DecodeHintType, Object> hints = new Hashtable();
+            hints.put(DecodeHintType.CHARACTER_SET, "UTF-8"); // 设置二维码内容的编码
+            hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+            hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);
+            PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(data,
+                    scanBitmap.getWidth(),
+                    scanBitmap.getHeight(),
+                    0, 0,
+                    scanBitmap.getWidth(),
+                    scanBitmap.getHeight(),
+                    false);
+
+            BinaryBitmap bitmap1 = new BinaryBitmap(new HybridBinarizer(source));
+            QRCodeReader reader2 = new QRCodeReader();
+            Result result = null;
+            try {
+                result = reader2.decode(bitmap1, hints);
+                Log.e("hxy", result.getText());
+            } catch (NotFoundException e) {
+                Log.e("hxy", "NotFoundException");
+            } catch (ChecksumException e) {
+                Log.e("hxy", "ChecksumException");
+            } catch (FormatException e) {
+                Log.e("hxy", "FormatException");
+            }
+
+            return result;
+        } catch (OutOfMemoryError s) {
+            s.printStackTrace();
+            return null;
         }
-
-        return result;
-
-
     }
 
 
