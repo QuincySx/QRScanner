@@ -15,8 +15,9 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
+        maven { url "https://raw.githubusercontent.com/QuincySx/mvn-repo/master/repository" }
         google()
+        jcenter()
         maven { url 'https://jitpack.io' }
     }
 }
