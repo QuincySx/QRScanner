@@ -72,7 +72,7 @@ public class BeepManager implements MediaPlayer.OnCompletionListener, MediaPlaye
             // too loud,
             // so we now play on the music stream.
             activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
-            mediaPlayer = buildMediaPlayer(activity);
+//            mediaPlayer = buildMediaPlayer(activity);
         }
     }
 

@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,8 +15,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -32,7 +32,7 @@ import java.io.IOException;
  * @author QuincySx
  * @date 2017/12/26 下午2:21
  */
-public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
+public class ScanFragment extends Fragment implements TextureView.SurfaceTextureListener {
     public static ScanFragment newInstance(IScanBoxView scanBoxView, ResultCallback resultCallback) {
         return newInstance(DefVerifyScan, scanBoxView, resultCallback);
     }
@@ -62,7 +62,7 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
     private InactivityTimer inactivityTimer;
     private BeepManager beepManager;
 
-    private SurfaceView scanPreview = null;
+    private TextureView scanPreview = null;
     private IScanBoxView mIScanBoxView = null;
     private boolean isHasSurface = false;
     private Rect mCropRect = null;
@@ -96,6 +96,8 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View inflate = inflater.inflate(R.layout.fragment_scan_box, container, false);
         scanPreview = inflate.findViewById(R.id.capture_preview);
+        scanPreview.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        scanPreview.setAlpha(0f);
 
         inactivityTimer = new InactivityTimer(getActivity());
         beepManager = new BeepManager(getActivity());
@@ -121,11 +123,11 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
             // The activity was paused but not stopped, so the surface still
             // exists. Therefore
             // surfaceCreated() won't be called, so init the camera here.
-            initCamera(scanPreview.getHolder());
+            initCamera(scanPreview.getSurfaceTexture());
         } else {
             // Install the callback and wait for surfaceCreated() to init the
             // camera.
-            scanPreview.getHolder().addCallback(this);
+            scanPreview.setSurfaceTextureListener(this);
         }
 
         inactivityTimer.onResume();
@@ -141,7 +143,7 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
         beepManager.close();
         cameraManager.closeDriver();
         if (!isHasSurface) {
-            scanPreview.getHolder().removeCallback(this);
+            scanPreview.setSurfaceTextureListener(null);
         }
         super.onPause();
     }
@@ -150,27 +152,6 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
     public void onDestroy() {
         inactivityTimer.shutdown();
         super.onDestroy();
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        if (holder == null) {
-            Log.e(TAG, "*** WARNING *** surfaceCreated() gave us a null surface!");
-        }
-        if (!isHasSurface) {
-            isHasSurface = true;
-            initCamera(holder);
-        }
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        isHasSurface = false;
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
     }
 
     /**
@@ -191,7 +172,7 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
         restartPreviewAfterDelay(1000);
     }
 
-    private void initCamera(SurfaceHolder surfaceHolder) {
+    private void initCamera(SurfaceTexture surfaceHolder) {
         if (surfaceHolder == null) {
             throw new IllegalStateException("No SurfaceHolder provided");
         }
@@ -199,7 +180,7 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
             Log.w(TAG, "initCamera() while already open -- late SurfaceView callback?");
             return;
         }
-
+        scanPreview.setAlpha(1f);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 && ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -272,13 +253,41 @@ public class ScanFragment extends Fragment implements SurfaceHolder.Callback {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_PERMISSION_CAMERA) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                initCamera(scanPreview.getHolder());
+                initCamera(scanPreview.getSurfaceTexture());
             } else {
-                Toast.makeText(getContext(), "没有相机权限", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), R.string.hint_qrscan_no_camera_permission, Toast.LENGTH_SHORT).show();
                 // Permission Denied
             }
             return;
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
+
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+        if (surface == null) {
+            Log.e(TAG, "*** WARNING *** surfaceCreated() gave us a null surface!");
+        }
+        if (!isHasSurface) {
+            isHasSurface = true;
+            initCamera(surface);
+        }
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        isHasSurface = false;
+        return false;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
+    }
+
 }

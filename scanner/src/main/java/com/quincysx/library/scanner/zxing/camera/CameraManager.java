@@ -17,11 +17,13 @@
 package com.quincysx.library.scanner.zxing.camera;
 
 import android.content.Context;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.Size;
 import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
+import android.view.TextureView;
 
 import com.quincysx.library.scanner.zxing.camera.open.OpenCameraInterface;
 
@@ -66,7 +68,7 @@ public class CameraManager {
      *               into.
      * @throws IOException Indicates the camera driver failed to open.
      */
-    public synchronized void openDriver(SurfaceHolder holder) throws IOException {
+    public synchronized void openDriver(SurfaceTexture holder) throws IOException {
         Camera theCamera = camera;
         if (theCamera == null) {
 
@@ -81,8 +83,7 @@ public class CameraManager {
             }
             camera = theCamera;
         }
-        theCamera.setPreviewDisplay(holder);
-
+        theCamera.setPreviewTexture(holder);
         if (!initialized) {
             initialized = true;
             configManager.initFromCameraParameters(theCamera);

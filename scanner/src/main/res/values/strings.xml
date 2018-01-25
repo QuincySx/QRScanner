@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">QRScanner</string>
     <string name="hint_qr_scanner_verify_error">二维码格式错误</string>
+    <string name="hint_qrscan_no_camera_permission">没有相机权限</string>
 </resources>
