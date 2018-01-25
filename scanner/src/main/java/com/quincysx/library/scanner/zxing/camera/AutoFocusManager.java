@@ -32,6 +32,8 @@ public class AutoFocusManager implements Camera.AutoFocusCallback {
     private static final String TAG = AutoFocusManager.class.getSimpleName();
 
     private static final long AUTO_FOCUS_INTERVAL_MS = 1000L;
+    private static final long FIRST_AUTO_FOCUS_INTERVAL_MS = 100L;
+    private boolean isFirstFocus = true;
     private static final Collection<String> FOCUS_MODES_CALLING_AF;
 
     static {
@@ -123,7 +125,12 @@ public class AutoFocusManager implements Camera.AutoFocusCallback {
         @Override
         protected Object doInBackground(Object... voids) {
             try {
-                Thread.sleep(AUTO_FOCUS_INTERVAL_MS);
+                if (isFirstFocus) {
+                    isFirstFocus = false;
+                    Thread.sleep(FIRST_AUTO_FOCUS_INTERVAL_MS);
+                } else {
+                    Thread.sleep(AUTO_FOCUS_INTERVAL_MS);
+                }
             } catch (InterruptedException e) {
                 // continue
             }
