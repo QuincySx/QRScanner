@@ -1,18 +1,18 @@
 package com.quincysx.scanner.sample;
 
 import android.content.Intent;
-import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.google.zxing.Result;
 import com.quincysx.library.scanner.utils.BitmapDecodeUtils;
+import com.quincysx.library.scanner.utils.RealPathUtil;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE = 0;
@@ -60,25 +60,8 @@ public class MainActivity extends AppCompatActivity {
                 case REQUEST_CODE:
                     String photo_path = "";
                     String[] proj = {MediaStore.Images.Media.DATA};
-                    // 获取选中图片的路径
-                    Cursor cursor = getContentResolver().query(data.getData(),
-                            proj, null, null, null);
-
-                    if (cursor.moveToFirst()) {
-
-                        int column_index = cursor
-                                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                        photo_path = cursor.getString(column_index);
-                        if (photo_path == null) {
-                            photo_path = Utils.getPath(getApplicationContext(),
-                                    data.getData());
-                            Log.i("123path  Utils", photo_path);
-                        }
-                        Log.i("123path", photo_path);
-
-                    }
-
-                    cursor.close();
+                    Uri fileUri = data.getData();
+                    photo_path = uriToFilename(fileUri);
 
                     final String finalPhoto_path = photo_path;
                     new Thread(new Runnable() {
@@ -100,11 +83,21 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }).start();
                     break;
-
             }
+        }
+    }
 
+    private String uriToFilename(Uri uri) {
+        String path = null;
+        if (Build.VERSION.SDK_INT < 11) {
+            path = RealPathUtil.getRealPathFromURI_BelowAPI11(this, uri);
+        } else if (Build.VERSION.SDK_INT < 19) {
+            path = RealPathUtil.getRealPathFromURI_API11to18(this, uri);
+        } else {
+            path = RealPathUtil.getRealPathFromURI_API19(this, uri);
         }
 
+        return path;
     }
 
 }

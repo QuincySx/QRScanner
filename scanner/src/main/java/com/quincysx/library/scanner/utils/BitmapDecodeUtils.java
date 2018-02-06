@@ -10,8 +10,12 @@ import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.FormatException;
+import com.google.zxing.LuminanceSource;
+import com.google.zxing.MultiFormatReader;
 import com.google.zxing.NotFoundException;
 import com.google.zxing.PlanarYUVLuminanceSource;
+import com.google.zxing.RGBLuminanceSource;
+import com.google.zxing.Reader;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
@@ -20,34 +24,57 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 
+import static android.content.ContentValues.TAG;
+
 /**
  * @author QuincySx
  * @date 2018/1/6 下午9:42
  */
 public class BitmapDecodeUtils {
+    private static String TAG = BitmapDecodeUtils.class.getSimpleName();
+
     public static Result scanningImage(String path) {
         if (TextUtils.isEmpty(path)) {
             return null;
         }
         BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inJustDecodeBounds = true; // 先获取原大小
         Bitmap scanBitmap = BitmapFactory.decodeFile(path, options);
-        return scanningImage(scanBitmap);
+        return scanQRImage(scanBitmap);
+    }
+
+    public static Result scanQRImage(Bitmap bMap) {
+        String contents = null;
+        Log.i(TAG, "扫码开始 " + System.currentTimeMillis());
+        int[] intArray = new int[bMap.getWidth() * bMap.getHeight()];
+        Log.i(TAG, "数组生命完成 " + System.currentTimeMillis());
+        //copy pixel data from the Bitmap into the 'intArray' array
+        bMap.getPixels(intArray, 0, bMap.getWidth(), 0, 0, bMap.getWidth(), bMap.getHeight());
+
+        Log.i(TAG, "数组转换完成 " + System.currentTimeMillis());
+
+        LuminanceSource source = new RGBLuminanceSource(bMap.getWidth(), bMap.getHeight(), intArray);
+        Log.i(TAG, "资源转换完成 完成 " + System.currentTimeMillis());
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+        Log.i(TAG, "导入加载器 完成 " + System.currentTimeMillis());
+
+        Reader reader = new MultiFormatReader();
+        try {
+            Log.i(TAG, " 开始解码 " + System.currentTimeMillis());
+            Result result = reader.decode(bitmap);
+            return result;
+        } catch (Exception e) {
+            Log.e("QrTest", "Error decoding barcode", e);
+        }
+        Log.i(TAG, " 解码完成 " + System.currentTimeMillis());
+        return null;
     }
 
     public static Result scanningImage(Bitmap scanBitmap) {
         try {
-//        BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inJustDecodeBounds = true; // 先获取原大小
-//        Bitmap scanBitmap = BitmapFactory.decodeFile(path, options);
-//        options.inJustDecodeBounds = false;
-//        int sampleSize = (int) (options.outHeight / (float) 200);
-//        if (sampleSize <= 0)
-//            sampleSize = 1;
-//
-//        options.inSampleSize = sampleSize;
-//        scanBitmap = BitmapFactory.decodeFile(path, options);
+            Log.i(TAG, "扫码开始 " + System.currentTimeMillis());
             byte[] data = getYUV420sp(scanBitmap.getWidth(), scanBitmap.getHeight(), scanBitmap);
+
+            Log.i(TAG, "YUV 完成 " + System.currentTimeMillis());
 
             Collection<BarcodeFormat> decodeFormats = new ArrayList<BarcodeFormat>();
             decodeFormats.add(BarcodeFormat.CODE_128);
@@ -57,6 +84,8 @@ public class BitmapDecodeUtils {
             hints.put(DecodeHintType.CHARACTER_SET, "UTF-8"); // 设置二维码内容的编码
             hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
             hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);
+
+            Log.i(TAG, "开始 YUV 差值化 " + System.currentTimeMillis());
             PlanarYUVLuminanceSource source = new PlanarYUVLuminanceSource(data,
                     scanBitmap.getWidth(),
                     scanBitmap.getHeight(),
@@ -65,10 +94,16 @@ public class BitmapDecodeUtils {
                     scanBitmap.getHeight(),
                     false);
 
+            Log.i(TAG, " YUV 差值化 完成 " + System.currentTimeMillis());
+
             BinaryBitmap bitmap1 = new BinaryBitmap(new HybridBinarizer(source));
+
+            Log.i(TAG, " 导入加载器 完成 " + System.currentTimeMillis());
+
             QRCodeReader reader2 = new QRCodeReader();
             Result result = null;
             try {
+                Log.i(TAG, " 开始解码 " + System.currentTimeMillis());
                 result = reader2.decode(bitmap1, hints);
                 Log.e("hxy", result.getText());
             } catch (NotFoundException e) {
@@ -78,7 +113,7 @@ public class BitmapDecodeUtils {
             } catch (FormatException e) {
                 Log.e("hxy", "FormatException");
             }
-
+            Log.i(TAG, " 解码完成 " + System.currentTimeMillis());
             return result;
         } catch (OutOfMemoryError s) {
             s.printStackTrace();
