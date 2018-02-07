@@ -1,6 +1,8 @@
 package com.quincysx.scanner.sample;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Looper;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 import com.google.zxing.Result;
 import com.quincysx.library.scanner.utils.BitmapDecodeUtils;
 import com.quincysx.library.scanner.utils.RealPathUtil;
+import com.quincysx.library.scanner.utils.UriUtils;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE = 0;
@@ -41,14 +44,10 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT < 19) {
             innerIntent.setAction(Intent.ACTION_GET_CONTENT);
         } else {
-// innerIntent.setAction(Intent.ACTION_OPEN_DOCUMENT); 这个方法报 图片地址 空指针；使用下面的方法
             innerIntent.setAction(Intent.ACTION_PICK);
         }
-
         innerIntent.setType("image/*");
-
         Intent wrapperIntent = Intent.createChooser(innerIntent, "选择二维码图片");
-
         startActivityForResult(wrapperIntent, REQUEST_CODE);
     }
 
@@ -59,25 +58,29 @@ public class MainActivity extends AppCompatActivity {
             switch (requestCode) {
                 case REQUEST_CODE:
                     String photo_path = "";
-                    String[] proj = {MediaStore.Images.Media.DATA};
                     Uri fileUri = data.getData();
-                    photo_path = uriToFilename(fileUri);
-
+                    photo_path = UriUtils.uriToFilename(this, fileUri);
                     final String finalPhoto_path = photo_path;
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-
-                            Result result = BitmapDecodeUtils.scanningImage(finalPhoto_path);
-                            // String result = decode(photo_path);
-                            if (result == null) {
+                            try {
+                                Result result = BitmapDecodeUtils.scanningImage(finalPhoto_path);
+                                // String result = decode(photo_path);
+                                if (result == null) {
+                                    Looper.prepare();
+                                    Toast.makeText(getApplicationContext(), "图片格式有误", Toast.LENGTH_SHORT)
+                                            .show();
+                                    Looper.loop();
+                                } else {
+                                    Looper.prepare();
+                                    Toast.makeText(MainActivity.this, result.getText(), Toast.LENGTH_SHORT).show();
+                                    Looper.loop();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
                                 Looper.prepare();
-                                Toast.makeText(getApplicationContext(), "图片格式有误", Toast.LENGTH_SHORT)
-                                        .show();
-                                Looper.loop();
-                            } else {
-                                Looper.prepare();
-                                Toast.makeText(MainActivity.this, result.getText(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, "图片太大，请扫码处理", Toast.LENGTH_SHORT).show();
                                 Looper.loop();
                             }
                         }
@@ -85,19 +88,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         }
-    }
-
-    private String uriToFilename(Uri uri) {
-        String path = null;
-        if (Build.VERSION.SDK_INT < 11) {
-            path = RealPathUtil.getRealPathFromURI_BelowAPI11(this, uri);
-        } else if (Build.VERSION.SDK_INT < 19) {
-            path = RealPathUtil.getRealPathFromURI_API11to18(this, uri);
-        } else {
-            path = RealPathUtil.getRealPathFromURI_API19(this, uri);
-        }
-
-        return path;
     }
 
 }

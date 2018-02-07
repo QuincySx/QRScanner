@@ -33,26 +33,60 @@ import static android.content.ContentValues.TAG;
 public class BitmapDecodeUtils {
     private static String TAG = BitmapDecodeUtils.class.getSimpleName();
 
+    public static int calculateInSampleSize(BitmapFactory.Options options,
+                                            int reqWidth, int reqHeight) {
+        // 源图片的高度和宽度
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+        if (height > reqHeight || width > reqWidth) {
+            // 计算出实际宽高和目标宽高的比率
+            final int heightRatio = Math.round((float) height / (float) reqHeight);
+            final int widthRatio = Math.round((float) width / (float) reqWidth);
+            // 选择宽和高中最小的比率作为inSampleSize的值，这样可以保证最终图片的宽和高
+            // 一定都会大于等于目标的宽和高。
+            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+        }
+        return inSampleSize;
+    }
+
     public static Result scanningImage(String path) {
         if (TextUtils.isEmpty(path)) {
             return null;
         }
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        Bitmap scanBitmap = BitmapFactory.decodeFile(path, options);
-        return scanQRImage(scanBitmap);
-    }
+        int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024) / 8;
 
-    public static Result scanQRImage(Bitmap bMap) {
-        String contents = null;
-        Log.i(TAG, "扫码开始 " + System.currentTimeMillis());
-        int[] intArray = new int[bMap.getWidth() * bMap.getHeight()];
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+
+        int sqrt = (int) Math.sqrt(maxMemory / 4d * 1024);
+
+        options.inJustDecodeBounds = false;
+        options.inSampleSize = calculateInSampleSize(options, sqrt, sqrt);
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+
+        Bitmap scanBitmap = BitmapFactory.decodeFile(path, options);
+        Log.e("====最大内存=====", maxMemory + "     " + options.inSampleSize + "    " + sqrt);
+
+        int[] intArray = new int[scanBitmap.getWidth() * scanBitmap.getHeight()];
         Log.i(TAG, "数组生命完成 " + System.currentTimeMillis());
         //copy pixel data from the Bitmap into the 'intArray' array
-        bMap.getPixels(intArray, 0, bMap.getWidth(), 0, 0, bMap.getWidth(), bMap.getHeight());
-
+        scanBitmap.getPixels(intArray, 0, scanBitmap.getWidth(), 0, 0, scanBitmap.getWidth(), scanBitmap.getHeight());
         Log.i(TAG, "数组转换完成 " + System.currentTimeMillis());
 
-        LuminanceSource source = new RGBLuminanceSource(bMap.getWidth(), bMap.getHeight(), intArray);
+        int width = scanBitmap.getWidth();
+        int height = scanBitmap.getHeight();
+        if (!scanBitmap.isRecycled()) {
+            scanBitmap.recycle();
+            System.gc();
+        }
+        return scanQRImage(intArray, width, height);
+    }
+
+    public static Result scanQRImage(int[] intArray, int width, int height) {
+        Log.i(TAG, "扫码开始 " + System.currentTimeMillis());
+        LuminanceSource source = new RGBLuminanceSource(width, height, intArray);
         Log.i(TAG, "资源转换完成 完成 " + System.currentTimeMillis());
         BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
         Log.i(TAG, "导入加载器 完成 " + System.currentTimeMillis());
@@ -63,7 +97,7 @@ public class BitmapDecodeUtils {
             Result result = reader.decode(bitmap);
             return result;
         } catch (Exception e) {
-            Log.e("QrTest", "Error decoding barcode", e);
+            e.printStackTrace();
         }
         Log.i(TAG, " 解码完成 " + System.currentTimeMillis());
         return null;
