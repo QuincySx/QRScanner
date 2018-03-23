@@ -65,16 +65,16 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             try {
-                                Result result = BitmapDecodeUtils.scanningImage(finalPhoto_path);
+                                String result = BitmapDecodeUtils.scanningImageZbar(finalPhoto_path);
                                 // String result = decode(photo_path);
-                                if (result == null) {
+                                if (result == null || result.equals("")) {
                                     Looper.prepare();
-                                    Toast.makeText(getApplicationContext(), "图片格式有误", Toast.LENGTH_SHORT)
+                                    Toast.makeText(getApplicationContext(), "没有扫描到二维码", Toast.LENGTH_SHORT)
                                             .show();
                                     Looper.loop();
                                 } else {
                                     Looper.prepare();
-                                    Toast.makeText(MainActivity.this, result.getText(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT).show();
                                     Looper.loop();
                                 }
                             } catch (Exception e) {

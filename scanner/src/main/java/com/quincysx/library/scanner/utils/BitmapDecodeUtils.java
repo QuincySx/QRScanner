@@ -1,5 +1,7 @@
 package com.quincysx.library.scanner.utils;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
@@ -19,7 +21,15 @@ import com.google.zxing.Reader;
 import com.google.zxing.Result;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
+import com.quincysx.library.scanner.zbar.ZBarConstants;
 
+import net.sourceforge.zbar.Config;
+import net.sourceforge.zbar.Image;
+import net.sourceforge.zbar.ImageScanner;
+import net.sourceforge.zbar.Symbol;
+import net.sourceforge.zbar.SymbolSet;
+
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
@@ -48,6 +58,48 @@ public class BitmapDecodeUtils {
             inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
         }
         return inSampleSize;
+    }
+
+    public static String scanningImageZbar(String path) {
+        if (TextUtils.isEmpty(path)) {
+            return null;
+        }
+        int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024) / 8;
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+
+        int sqrt = (int) Math.sqrt(maxMemory / 4d * 1024);
+
+        options.inJustDecodeBounds = false;
+        options.inSampleSize = calculateInSampleSize(options, 2000, 2000);
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+
+        Bitmap barcodeBmp = BitmapFactory.decodeFile(path, options);
+        Log.e("====最大内存=====", maxMemory + "     " + options.inSampleSize + "    " + sqrt);
+
+        int width = barcodeBmp.getWidth();
+        int height = barcodeBmp.getHeight();
+
+        Log.e("====", "=宽高=" + width + "    " + height);
+
+        int[] pixels = new int[width * height];
+        barcodeBmp.getPixels(pixels, 0, width, 0, 0, width, height);
+        Image barcode = new Image(width, height, "RGB4");
+        barcode.setData(pixels);
+        ImageScanner reader = new ImageScanner();
+        reader.setConfig(Symbol.NONE, Config.ENABLE, 0);
+        reader.setConfig(Symbol.QRCODE, Config.ENABLE, 1);
+        int result = reader.scanImage(barcode.convert("Y800"));
+        String qrCodeString = null;
+        if (result != 0) {
+            SymbolSet syms = reader.getResults();
+            for (Symbol sym : syms) {
+                qrCodeString = sym.getData();
+            }
+        }
+        return qrCodeString;
     }
 
     public static Result scanningImage(String path) {
